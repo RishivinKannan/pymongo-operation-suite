@@ -4,7 +4,8 @@ import TestDashboard from './components/TestDashboard'
 import TraceViewer from './components/TraceViewer'
 import { SnackbarProvider } from './components/Snackbar'
 
-const API_BASE = 'http://localhost:5000'
+// Use relative path when served from backend, or full URL for dev
+const API_BASE = import.meta.env.DEV ? 'http://localhost:5000' : ''
 
 function App() {
     const [health, setHealth] = useState(null)

@@ -1,4 +1,4 @@
-# PyMongo Testing with Observability
+# PyMongo Operations Suite
 
 A comprehensive testing framework for PyMongo with integrated observability using OpenTelemetry, Datadog, and Atatus. Test all 35 MongoDB Collection methods through a beautiful web UI.
 
@@ -32,47 +32,40 @@ cp .env.example .env
 # (Optional) Add your Datadog API key and Atatus license key to .env
 ```
 
-### 2. Start Infrastructure
+### 2. Start Application
+
+The entire application (Database, Backend, Frontend, Observability) allows you to use a single command:
 
 ```bash
-# Start MongoDB and Jaeger
-docker-compose up -d
-
-# Wait for MongoDB replica set to initialize (about 30 seconds)
-sleep 30
+docker-compose up -d --build
 ```
 
-### 3. Start Backend
+### 3. Access the Application
 
+- **Web UI**: `http://localhost:5000` (Served by Flask Backend)
+- **Jaeger UI**: `http://localhost:16686`
+- **MongoDB**: `mongodb://localhost:27017`
+
+### 4. Development (Optional)
+
+If you want to run components individually for development:
+
+**Backend:**
 ```bash
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Start Flask API
 cd backend
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
 python app.py
 ```
 
-Backend will be available at `http://localhost:5000`
-
-### 4. Start Frontend
-
+**Frontend:**
 ```bash
-# In a new terminal
 cd frontend
-
-# Install dependencies
 npm install
-
-# Start development server
 npm run dev
 ```
-
-Frontend will be available at `http://localhost:5173`
+Development UI: `http://localhost:5173`
 
 ## 🎯 Using the Application
 

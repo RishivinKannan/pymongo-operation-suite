@@ -3,7 +3,7 @@ Flask REST API for PyMongo Testing
 Provides endpoints for all 35 MongoDB Collection operations
 """
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 from pymongo import IndexModel, ASCENDING, DESCENDING
@@ -20,8 +20,8 @@ load_dotenv()
 
 # Initialize observability
 
-# Create Flask app
-app = Flask(__name__)
+# Create Flask app with static file serving
+app = Flask(__name__, static_folder='static', static_url_path='')
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
 observability_status = initialize_observability(app)
 CORS(app)  # Enable CORS for frontend
@@ -54,6 +54,19 @@ def health_check():
             "atatus": observability_status.get('atatus', False)
         }
     })
+
+@app.route('/')
+def serve_index():
+    """Serve the React frontend"""
+    return send_from_directory(app.static_folder, 'index.html')
+
+@app.errorhandler(404)
+def not_found(e):
+    """Serve index.html for client-side routing (SPA)"""
+    # Only serve index.html for non-API routes
+    if not request.path.startswith('/api/'):
+        return send_from_directory(app.static_folder, 'index.html')
+    return jsonify({"error": "Not found"}), 404
 
 @app.route('/api/stats', methods=['GET'])
 def get_stats():
@@ -852,4 +865,4 @@ if __name__ == '__main__':
     print(f"🔧 Debug Mode: {debug}")
     print(f"🔌 WebSocket: Enabled\n")
     
-    socketio.run(app, host='0.0.0.0', port=port, debug=debug)
+    socketio.run(app, host='0.0.0.0', port=port, debug=debug, allow_unsafe_werkzeug=True)

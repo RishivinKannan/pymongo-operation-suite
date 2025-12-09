@@ -35,6 +35,25 @@ services:
     networks:
       - pymongo-network
 
+  # PyMongo Operations Suite Application
+  app:
+    build: .
+    image: pymongo-operations-suite
+    container_name: pymongo-operations-suite
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    environment:
+      # Override for Docker networking
+      - MONGODB_URI=mongodb://mongodb:27017/
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
+    depends_on:
+      - mongodb
+      - jaeger
+    networks:
+      - pymongo-network
+
 volumes:
   mongodb_data:
 
