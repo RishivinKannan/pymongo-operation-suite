@@ -13,17 +13,20 @@ from dotenv import load_dotenv
 from observability import initialize_observability
 from database import MongoDBOperations
 
+import atatus
+
 # Load environment variables
 load_dotenv()
 
 # Initialize observability
-observability_status = initialize_observability()
 
 # Create Flask app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
+observability_status = initialize_observability(app)
 CORS(app)  # Enable CORS for frontend
 
+atatus_client = atatus.get_client()
 # Initialize SocketIO
 socketio = SocketIO(app, cors_allowed_origins="*")
 
@@ -566,6 +569,8 @@ def list_operations():
 
 @app.route('/api/run_all', methods=['POST'])
 def run_all_operations():
+ # your transaction name
+    # TODO: your operations
     """Execute all 35 operations concurrently by calling their API endpoints"""
     import time
     from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -734,14 +739,16 @@ def run_all_operations():
         })
         
         try:
-            # Use Flask test client to call the endpoint
-            with app.test_client() as client:
-                # Use GET for endpoints that require it
-                if op_name == 'estimated_document_count':
-                    response = client.get(endpoint)
-                else:
-                    response = client.post(endpoint, json=payload, content_type='application/json')
-                result_data = response.get_json() if response.data else {}
+            # Make an HTTP request to the endpoint
+            import requests as http_requests
+            base_url = f"http://localhost:{os.getenv('FLASK_PORT', 5000)}"
+            
+            # Use GET for endpoints that require it
+            if op_name == 'estimated_document_count':
+                response = http_requests.get(f"{base_url}{endpoint}")
+            else:
+                response = http_requests.post(f"{base_url}{endpoint}", json=payload)
+            result_data = response.json() if response.text else {}
                 
             op_time = (time.time() - op_start) * 1000  # Convert to ms
             

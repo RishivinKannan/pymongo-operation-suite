@@ -16,6 +16,7 @@ from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExport
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.instrumentation.pymongo import PymongoInstrumentor
 
+from atatus.contrib.flask import Atatus
 
 def setup_opentelemetry():
     """Initialize OpenTelemetry with Jaeger exporter"""
@@ -89,34 +90,32 @@ def setup_datadog():
         return False
 
 
-def setup_atatus():
+def setup_atatus(app):
     """Initialize Atatus monitoring if license key is provided"""
-    atatus_key = os.getenv('ATATUS_LICENSE_KEY')
-    
-    if atatus_key:
-        try:
-            import atatus
-            
-            app_name = os.getenv('ATATUS_APP_NAME', 'pymongo-testing')
-            environment = os.getenv('ATATUS_ENVIRONMENT', 'development')
-            
-            atatus.configure(
-                license_key=atatus_key,
-                app_name=app_name,
-                environment=environment
-            )
-            
-            print(f"✓ Atatus configured - App: {app_name}, Env: {environment}")
-            return True
-        except Exception as e:
-            print(f"⚠ Atatus setup failed: {e}")
-            return False
-    else:
-        print("ℹ Atatus license key not provided - skipping Atatus integration")
+    try:
+        app_name = os.environ.get('ATATUS_APP_NAME', 'pymongo-operations-suite')
+        app.config['ATATUS'] = {
+            'APP_NAME': app_name,
+            'LICENSE_KEY': os.environ.get('ATATUS_LICENSE_KEY'),
+            'TRACING': True,
+            'ANALYTICS': True,
+            'ANALYTICS_CAPTURE_OUTGOING': True,
+            'LOG_BODY': 'all',
+            # 'LOG_FILE': '/home/namlabs/development/testing/pymongo-test/atatus.log',
+            # 'LOG_LEVEL': 'debug',
+            'DEBUG': True
+        }
+        atatus = Atatus(app)
+        
+        print(f"✓ Atatus configured - App: {app_name}")
+        return True
+    except Exception as e:
+        print(f"⚠ Atatus setup failed: {e}")
         return False
 
 
-def initialize_observability():
+
+def initialize_observability(app):
     """Initialize all observability platforms"""
     print("\n" + "="*60)
     print("Initializing Observability Platforms")
@@ -127,7 +126,7 @@ def initialize_observability():
     
     # Optional integrations
     datadog_enabled = setup_datadog()
-    atatus_enabled = setup_atatus()
+    atatus_enabled = setup_atatus(app)
     
     print("="*60)
     print(f"Observability Status:")
