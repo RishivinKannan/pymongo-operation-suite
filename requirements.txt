@@ -1,0 +1,27 @@
+# MongoDB Driver (3.13.0 includes deprecated methods like insert, save, count, update, etc.)
+pymongo==3.13.0
+
+# Observability - OpenTelemetry
+opentelemetry-api>=1.21.0
+opentelemetry-sdk>=1.21.0
+opentelemetry-exporter-otlp>=1.21.0
+opentelemetry-instrumentation-pymongo>=0.43b0
+
+# Observability - Datadog
+ddtrace>=2.5.0
+
+# Observability - Atatus
+atatus
+
+# Web Framework
+Flask>=3.0.0
+Flask-CORS>=4.0.0
+Flask-SocketIO>=5.3.5
+python-socketio>=5.10.0
+
+# Testing
+pytest>=7.4.3
+pytest-asyncio>=0.21.1
+
+# Utilities
+python-dotenv>=1.0.0
